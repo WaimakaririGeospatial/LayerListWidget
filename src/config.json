@@ -1,0 +1,29 @@
+{
+  "showLegend": true,
+   "metadataTool": {
+        "path": "/exts/LayerMetadata/getMetadata?layer={layerId}&f=pjson",
+        "metadataParseConfig": [
+                {
+                    "label": "",
+                    "path": "dataIdInfo->idAbs"
+                },
+				{
+                    "label":"Credit",
+                    "path":"dataIdInfo->idCredit"
+                },
+                {
+                    "label":"Use Limitations",
+                    "path":"dataIdInfo->resConst->Consts->useLimit"
+                },
+				{
+                    "label":"Date Last Updated",
+                    "path":"dataIdInfo->resConst->Consts->useLimit"
+                }
+                               
+        ]
+    }
+					
+}
+
+
+
