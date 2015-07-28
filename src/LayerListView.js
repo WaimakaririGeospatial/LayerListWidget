@@ -530,13 +530,13 @@ define([
         array.forEach(this.scaleConfig, function (layerItem) {
             if (layerItem.layerInfo.layerObject && (layerItem.layerInfo.layerObject.maxScale || layerItem.layerInfo.layerObject.minScale)) {
                 var layerObject = layerItem.layerInfo.layerObject;
-                var layerNode = layerItem.layerNode;
+                var layerTextNode = layerItem.layerNode.childNodes[1];
                 var outScale = (layerObject.maxScale != 0 && scale <layerObject.maxScale) || (layerObject.minScale != 0 && scale > layerObject.minScale);
                 if (outScale) {
-                    domClass.add(layerNode, 'LayerOutOfScale');
+                    if (layerTextNode) domClass.add(layerTextNode, 'LayerOutOfScale');
                
                 } else {
-                    domClass.remove(layerNode, 'LayerOutOfScale');
+                    if (layerTextNode) domClass.remove(layerTextNode, 'LayerOutOfScale');
                   
                 }
             }
