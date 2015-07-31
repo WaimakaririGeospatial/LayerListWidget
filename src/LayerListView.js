@@ -526,8 +526,71 @@ define([
       }
     },
     _adjustToState: function () {
+        // summary:
+        //    enhance the layer name with a font refelcting out-of-scale or in-scale
+        // description:
+        //    when ever a scale change happens,this method is called to update the layer title with a
+        //    font effect giving an intuition to the user whether the layer is out-of-scale or in-scale of the map
+        
         var scale = this.map.getScale();
-        array.forEach(this.scaleConfig, function (layerItem) {
+
+        //1/filter the layers with newSubLayers.length = 0,so this will ensure that these are the actual layers
+        var actualLeafLayers = array.filter(this.scaleConfig, lang.hitch(this,function (item) {
+            return item.layerInfo.newSubLayers && item.layerInfo.newSubLayers.length == 0;
+        }));
+
+       
+        array.forEach(actualLeafLayers, lang.hitch(this,function (leafItem) {
+            var minScale = 0;
+            var maxScale = 0;
+            if (leafItem.layerInfo.originOperLayer.layerType === "ArcGISFeatureLayer") {
+                var actualFeatureLayer = this.map.getLayer(leafItem.layerInfo.id);
+                var jsonInfo = null;
+                if (actualFeatureLayer._json) {
+                    jsonInfo = JSON.parse(actualFeatureLayer._json);
+                }
+
+                if (actualFeatureLayer.maxScale) {
+                    maxScale = actualFeatureLayer.maxScale;
+                } else if (jsonInfo && jsonInfo.maxScale) {
+                    maxScale = jsonInfo.maxScale;
+                }
+
+                if (actualFeatureLayer.minScale) {
+                    minScale = actualFeatureLayer.minScale;
+                } else if (jsonInfo && jsonInfo.minScale) {
+                    minScale = jsonInfo.minScale;
+                }
+
+            } else if (leafItem.layerInfo.originOperLayer.mapService) {
+                var mapService = leafItem.layerInfo.originOperLayer.mapService;
+                var layerId = mapService.subId;
+                var subLayerInfoArray = mapService.layerInfo.layerObject.layerInfos;
+                var subLayerInfo = array.filter(subLayerInfoArray, function (info) {
+                    return Number(info.id) == Number(layerId) ;
+                })[0];
+                maxScale = subLayerInfo.maxScale;
+                minScale = subLayerInfo.minScale;
+            
+            }
+            var layerTextNode = leafItem.layerNode.childNodes[1];
+            var outScale = (maxScale != 0 && scale < maxScale) || (minScale != 0 && scale > minScale);
+            if (outScale) {
+                if (layerTextNode) domClass.add(layerTextNode, 'LayerOutOfScale');
+
+            } else {
+                if (layerTextNode) domClass.remove(layerTextNode, 'LayerOutOfScale');
+
+            }
+           
+            
+        }));
+
+        //2/filter the layers with newSubLayers.length > 0,so this will ensure that these are the parent layers
+        var parentLayers = array.filter(this.scaleConfig, lang.hitch(this,function (item) {
+            return item.layerInfo.newSubLayers && item.layerInfo.newSubLayers.length > 0;
+        }));
+        array.forEach(parentLayers, function (layerItem) {
             if (layerItem.layerInfo.layerObject && (layerItem.layerInfo.layerObject.maxScale || layerItem.layerInfo.layerObject.minScale)) {
                 var layerObject = layerItem.layerInfo.layerObject;
                 var layerTextNode = layerItem.layerNode.childNodes[1];
@@ -540,7 +603,6 @@ define([
                   
                 }
             }
-            
         });
 
     }
