@@ -8,16 +8,20 @@
                     "path": "dataIdInfo->idAbs"
                 },
 				{
+                    "label":"Details",
+                    "path":"dataIdInfo->idPurp"
+                },
+				{
                     "label":"Credit",
                     "path":"dataIdInfo->idCredit"
                 },
                 {
-                    "label":"Use Limitations",
+                    "label":"Use Limitation",
                     "path":"dataIdInfo->resConst->Consts->useLimit"
                 },
 				{
-                    "label":"Date Last Updated",
-                    "path":"dataIdInfo->resConst->Consts->useLimit"
+                    "label":"Last Updated",
+                    "path":"dataIdInfo->idCitation->date->reviseDate"
                 }
                                
         ]
