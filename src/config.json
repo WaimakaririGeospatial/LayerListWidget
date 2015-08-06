@@ -5,23 +5,23 @@
         "metadataParseConfig": [
                 {
                     "label": "",
-                    "path": "dataIdInfo->idAbs"
-                },
-				{
-                    "label":"Details",
-                    "path":"dataIdInfo->idPurp"
+                    "path": "description",
+					"source":"mxd"
                 },
 				{
                     "label":"Credit",
-                    "path":"dataIdInfo->idCredit"
+                    "path":"copyrightText",
+					"source":"mxd"
                 },
                 {
                     "label":"Use Limitation",
-                    "path":"dataIdInfo->resConst->Consts->useLimit"
+                    "path":"dataIdInfo->resConst->Consts->useLimit",
+					"source":"soe"
                 },
 				{
                     "label":"Last Updated",
-                    "path":"dataIdInfo->idCitation->date->reviseDate"
+                    "path":"dataIdInfo->idCitation->date->reviseDate",
+					"source":"soe"
                 }
                                
         ]

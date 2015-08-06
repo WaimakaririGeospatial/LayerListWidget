@@ -3,6 +3,7 @@
     "dojo/_base/declare",
     "dojo/_base/array",
     "dojo/_base/lang",
+    "dojo/promise/all",
     "dojo/dom",
     "dojo/dom-construct",
     "dojo/dom-style",
@@ -21,6 +22,7 @@
   declare,
   array,
   lang,
+  all,
   dom,
   domConstruct,
   domStyle,
@@ -80,20 +82,33 @@
             var itemUrl = url.replace("/FeatureServer/", "/MapServer/");
             var layerId = itemUrl.substr(itemUrl.lastIndexOf('/') + 1);
             var serviceUrl = itemUrl.replace(itemUrl.substr(itemUrl.lastIndexOf('/')), '');
-            
             var url = serviceUrl + this.config.path;
 
             url = url.replace(/\{([a-zA-Z]+)\}/g, function (match) {
                 return layerId;
             });
-
-            esriRequest({
-                url: url,
-                callbackParamName: "callback",
-                handleAs: "json",
-            }).then(lang.hitch(this,function (response) {
-                this.parseMetadata(response.metadata);
+            var requests = {
+                soe: esriRequest({
+                    url: url,
+                    callbackParamName: "callback",
+                    handleAs: "json"
+                }),
+                mxd: esriRequest({
+                    url: itemUrl,
+                    callbackParamName: "callback",
+                    handleAs: "json",
+                    content: {
+                        f:"json"
+                    }
+                })
+            }
+            all(requests).then(lang.hitch(this, function (response) {
+                if (response.soe && response.soe.metadata) {
+                    lang.mixin(response.soe, response.soe.metadata);
+                }
+                this.parseMetadata(response);
             }),lang.hitch(this, function (error) {
+                console.log(error);
                 var popup = new Message({
                     message: this.nls.metadataWarning,
                     buttons: [{
@@ -114,7 +129,7 @@
             });
             array.forEach(componentConfig, lang.hitch(this, function (config, index) {
                 var label = config.label;
-                var info =   this.findDataInPath(config.path, metadata);
+                var info =   this.findDataInPath(config.path, metadata[config.source]);
                 if(info != null){
                     if (label.length > 0) {
                         var labelNode = domConstruct.create("div", {
@@ -159,11 +174,17 @@
                     data = metadata;
                 }
             });
+            if (new RegExp("reviseDate").test(path) && data) {
+                data = this.formatDate(data);
+            }
             return data ? this.stripHtml(data) : data;
         },
         stripHtml: function (str) {
             var regex = /(<([^>]+)>)/ig;
             return str.replace(regex, "");
+        },
+        formatDate: function (date) {
+            return date.replace(/[A-Z]+.*/g, "").split("-").reverse().join("-");
         }
     });
     return Metadata;
