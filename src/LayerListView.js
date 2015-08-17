@@ -63,13 +63,7 @@ define([
         this.drawListNode(layerInfo, 0, this.tableListTable, true);
         }, this);
 
-        //this will grey out layer nodes when zoomed out of scale
-        if (!this._zoomHandler) {
-            var map = this.map;
-            this._zoomHandler = this.own(on(map, 'zoom-end', lang.hitch(this,
-                                                                        this._adjustToState)));
-        }
-        this._adjustToState();
+      
     },
 
     drawListNode: function(layerInfo, level, toTableNode) {
@@ -531,7 +525,6 @@ define([
         // description:
         //    when ever a scale change happens,this method is called to update the layer title with a
         //    font effect giving an intuition to the user whether the layer is out-of-scale or in-scale of the map
-        
         var scale = this.map.getScale();
 
         //1/filter the layers with newSubLayers.length = 0,so this will ensure that these are the actual layers

@@ -19,6 +19,7 @@ define([
     'dojo/_base/declare',
     'dojo/_base/lang',
     'dojo/_base/array',
+    "dojo/topic",
     'dojo/dom-construct',
     'dojo/dom-geometry',
     'dojo/dom',
@@ -35,7 +36,7 @@ define([
     'jimu/LayerInfos/LayerInfos',
     'dojo/promise/all'
   ],
-  function(BaseWidget, declare, lang, array, domConstruct, domGeometry, dom, on, baseUnload,
+  function(BaseWidget, declare, lang, array,topic, domConstruct, domGeometry, dom, on, baseUnload,
   aspect, query, Selectionbox, LayerListView, PopupMenu, domStyle, NlsStrings, LayerInfoFactory,
   LayerInfos, all) {
     var clazz = declare([BaseWidget], {
@@ -103,6 +104,20 @@ define([
             dom.setSelectable(this.layersSection, false);
           }));
         }
+
+        topic.subscribe("webmapSwitchEvent", lang.hitch(this, function () {
+             if(this.layerListView) this.layerListView._adjustToState();
+        }));
+          //this will grey out layer nodes when zoomed out of scale
+        if (!this._zoomHandler) {
+            var map = this.map;
+            this._zoomHandler = this.own(
+                on(map, 'zoom-end', lang.hitch(this,function(){
+                    if(this.layerListView) this.layerListView._adjustToState();
+                }))
+            );
+        }
+        if (this.layerListView) this.layerListView._adjustToState();
       },
 
       destroy: function() {
