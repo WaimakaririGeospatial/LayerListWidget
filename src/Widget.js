@@ -44,7 +44,6 @@ define([
       //these two properties is defined in the BaseWiget 
       baseClass: 'jimu-widget-layerList',
       name: 'layerList',
-
       //layerListView: Object{}
       //  A module is responsible for show layers list
       layerListView: null,
@@ -81,45 +80,38 @@ define([
         // }));
 
         if (this.map.itemId) {
-          LayerInfos.getInstance(this.map, this.map.itemInfo)
-          .then(lang.hitch(this, function(operLayerInfos) {
+          LayerInfos.getInstance(this.map, this.map.itemInfo).then(lang.hitch(this, function(operLayerInfos) {
             this.operLayerInfos = operLayerInfos;
             this.showLayers();
             //this.bindEvents();
-            this.own(on(this.operLayerInfos,
-                        'layerInfosChanged',
-                        lang.hitch(this, this._onLayerInfosChanged)));
+            this.own(on(this.operLayerInfos, 'layerInfosChanged', lang.hitch(this, this._onLayerInfosChanged)));
             dom.setSelectable(this.layersSection, false);
+            if (this.layerListView) this.layerListView._adjustToState();
           }));
         } else {
           var itemInfo = this._obtainMapLayers();
-          LayerInfos.getInstance(this.map, itemInfo)
-          .then(lang.hitch(this, function(operLayerInfos) {
-            this.operLayerInfos = operLayerInfos;
-            this.showLayers();
-            //this.bindEvents();
-            this.own(on(this.operLayerInfos,
-                        'layerInfosChanged',
-                        lang.hitch(this, this._onLayerInfosChanged)));
-            dom.setSelectable(this.layersSection, false);
+          LayerInfos.getInstance(this.map, itemInfo).then(lang.hitch(this, function(operLayerInfos) {
+                this.operLayerInfos = operLayerInfos;
+                this.showLayers();
+                //this.bindEvents();
+                this.own(on(this.operLayerInfos, 'layerInfosChanged', lang.hitch(this, this._onLayerInfosChanged)));
+                dom.setSelectable(this.layersSection, false);
+                if (this.layerListView) this.layerListView._adjustToState();
           }));
         }
-
-        topic.subscribe("webmapSwitchEvent", lang.hitch(this, function () {
-             if(this.layerListView) this.layerListView._adjustToState();
-        }));
-          //this will grey out layer nodes when zoomed out of scale
-        if (!this._zoomHandler) {
-            var map = this.map;
-            this._zoomHandler = this.own(
-                on(map, 'zoom-end', lang.hitch(this,function(){
-                    if(this.layerListView) this.layerListView._adjustToState();
-                }))
-            );
-        }
-        if (this.layerListView) this.layerListView._adjustToState();
+        this._registerMapZoom();
       },
-
+      _registerMapZoom:function(){
+          //this will grey out layer nodes when zoomed out of scale
+          if (!this._zoomHandler) {
+              var map = this.map;
+              this._zoomHandler = this.own(
+                  on(map, 'zoom-end', lang.hitch(this, function () {
+                      if (this.layerListView) this.layerListView._adjustToState();
+                  }))
+              );
+          }
+      },
       destroy: function() {
         this._clearLayers();
         this.inherited(arguments);
@@ -299,9 +291,9 @@ define([
         }
       },
 
-      _onLayerInfosChanged: function(layerInfo, changedType) {
-        this._clearLayers();
-        this.showLayers();
+      _onLayerInfosChanged: function (layerInfo, changedType) {
+          this._clearLayers();
+          this.showLayers();
       }
       //_onLayersScaleChange: function (event) {
       //    console.log("mapScale");

@@ -420,7 +420,6 @@ define([
         popupMenu.closeDropMenu();
       }
       */
-      console.log("aaa");
     },
 
     _onLayerListWidgetPaneClick: function(popupMenu) {

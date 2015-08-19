@@ -109,15 +109,7 @@
                 this.parseMetadata(response);
             }),lang.hitch(this, function (error) {
                 console.log(error);
-                var popup = new Message({
-                    message: this.nls.metadataWarning,
-                    buttons: [{
-                        label: this.nls.ok,
-                        onClick: lang.hitch(this, function () {
-                            popup.close();
-                        })
-                    }]
-                });
+                this._showNoDataWarning();
             }));
         },
         parseMetadata: function (metadata) {
@@ -127,9 +119,11 @@
             var messageContent = domConstruct.create("div", {
                 style: "position:relative;margin:0 auto;width:100%;"
             });
+            var noData = true;
             array.forEach(componentConfig, lang.hitch(this, function (config, index) {
                 var label = config.label;
-                var info =   this.findDataInPath(config.path, metadata[config.source]);
+                var info = this.findDataInPath(config.path, metadata[config.source]);
+                
                 if(info != null){
                     if (label.length > 0) {
                         var labelNode = domConstruct.create("div", {
@@ -147,13 +141,30 @@
                     }
 
                     domConstruct.place(infoNode, messageContent);
+                    noData = false;
                 }
             }));
-            var popup = new Popup({
-                content: messageContent,
-                titleLabel: this._popupTitle,
-                autoHeight: true,
-                maxWidth:400,
+            if (noData) {
+                this._showNoDataWarning();
+            } else {
+                var popup = new Popup({
+                    content: messageContent,
+                    titleLabel: this._popupTitle,
+                    autoHeight: true,
+                    maxWidth: 400,
+                    buttons: [{
+                        label: this.nls.ok,
+                        onClick: lang.hitch(this, function () {
+                            popup.close();
+                        })
+                    }]
+                });
+            }
+           
+        },
+        _showNoDataWarning:function(){
+            var popup = new Message({
+                message: this.nls.metadataWarning,
                 buttons: [{
                     label: this.nls.ok,
                     onClick: lang.hitch(this, function () {
