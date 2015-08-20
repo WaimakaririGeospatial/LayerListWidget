@@ -537,6 +537,9 @@ define([
             var maxScale = 0;
             if (leafItem.layerInfo.originOperLayer.layerType === "ArcGISFeatureLayer") {
                 var actualFeatureLayer = this.map.getLayer(leafItem.layerInfo.id);
+                if (!actualFeatureLayer) {
+                    return
+                }
                 var jsonInfo = null;
                 if (actualFeatureLayer._json) {
                     jsonInfo = JSON.parse(actualFeatureLayer._json);
