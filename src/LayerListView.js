@@ -55,7 +55,7 @@ define([
     postCreate: function () {
         var config = this.config.metadataTool;
         this.metadata = new Metadata(config);
-        array.forEach(this.operLayerInfos.finalLayerInfos, function (layerInfo) {
+        array.forEach(this.operLayerInfos.getLayerInfoArray(), function (layerInfo) {
             this.drawListNode(layerInfo, 0, this.layerListTable, true);
         }, this);
 

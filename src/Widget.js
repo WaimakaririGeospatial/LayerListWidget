@@ -19,6 +19,7 @@ define([
     'dojo/_base/declare',
     'dojo/_base/lang',
     'dojo/_base/array',
+      'dojo/dom-attr',
     "dojo/topic",
     'dojo/dom-construct',
     'dojo/dom-geometry',
@@ -27,7 +28,6 @@ define([
     'dojo/_base/unload',
     'dojo/aspect',
     'dojo/query',
-    'jimu/dijit/Selectionbox',
     './LayerListView',
     './PopupMenu',
     'dojo/dom-style',
@@ -36,8 +36,8 @@ define([
     'jimu/LayerInfos/LayerInfos',
     'dojo/promise/all'
   ],
-  function(BaseWidget, declare, lang, array,topic, domConstruct, domGeometry, dom, on, baseUnload,
-  aspect, query, Selectionbox, LayerListView, PopupMenu, domStyle, NlsStrings, LayerInfoFactory,
+  function(BaseWidget, declare, lang, array,domAttr,topic, domConstruct, domGeometry, dom, on, baseUnload,
+  aspect, query, LayerListView, PopupMenu, domStyle, NlsStrings, LayerInfoFactory,
   LayerInfos, all) {
     var clazz = declare([BaseWidget], {
       /*jshint unused: false*/
@@ -53,7 +53,8 @@ define([
       operLayerInfos: null,
 
       startup: function() {
-        NlsStrings.value = this.nls;
+          NlsStrings.value = this.nls;
+          
         // summary:
         //    this function will be called when widget is started.
         // description:
@@ -100,6 +101,7 @@ define([
           }));
         }
         this._registerMapZoom();
+        this._setVersionTitle();
       },
       _registerMapZoom:function(){
           //this will grey out layer nodes when zoomed out of scale
@@ -294,6 +296,38 @@ define([
       _onLayerInfosChanged: function (layerInfo, changedType) {
           this._clearLayers();
           this.showLayers();
+      },
+      _setVersionTitle: function () {
+          var labelNode = this._getLabelNode(this);
+          var manifestInfo = this.manifest;
+          var devVersion = manifestInfo.version;
+          var devWabVersion = manifestInfo.developedAgainst || manifestInfo.wabVersion;
+          var codeSourcedFrom = manifestInfo.codeSourcedFrom;
+          var client = manifestInfo.client;
+
+          var title = "Dev version: " + devVersion + "\n";
+          title += "Developed/Modified against: WAB" + devWabVersion + "\n";
+          title += "Client: " + client + "\n";
+          if (codeSourcedFrom) {
+              title += "Code sourced from: " + codeSourcedFrom + "\n";
+          }
+
+          if (labelNode) {
+              domAttr.set(labelNode, 'title', title);
+          }
+
+      },
+      _getLabelNode: function (widget) {
+          var labelNode;
+          if (!(widget.labelNode) && !(widget.titleLabelNode)) {
+              if (widget.getParent()) {
+                  labelNode = this._getLabelNode(widget.getParent());
+              }
+          } else {
+              labelNode = widget.labelNode || widget.titleLabelNode;
+          }
+          return labelNode;
+
       }
       //_onLayersScaleChange: function (event) {
       //    console.log("mapScale");
